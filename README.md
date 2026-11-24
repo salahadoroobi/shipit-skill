@@ -4,15 +4,16 @@ A Codex skill that turns a project into a published release with one request.
 
 Ask Codex to "prepare a release" and the skill:
 
-1. Creates `outputs/<version>/` next to your project folder.
-2. Builds the ready installer (Inno Setup, Electron, or .NET detected automatically).
-3. Builds the signed update package, if your project has one.
-4. Archives the source as zip or rar, leaving out `.git`, build folders, and secrets.
-5. Lists every file with its size and SHA-256.
-6. Shows a summary and waits for your approval.
-7. Uploads the release to your releases repo with `gh release create`, either full (installer + source) or update-only.
+1. Tracks the version for you: it reads your project's latest existing version (VERSION file, package.json, .csproj, or the newest git tag) and bumps it by one. On a first release with no version yet, it asks you what number to start from. A version you state always wins.
+2. Creates `outputs/<version>/` next to your project folder.
+3. Builds the ready installer (Inno Setup, Electron, or .NET detected automatically).
+4. Builds the signed update package, if your project has one.
+5. Archives the source as zip or rar, leaving out `.git`, build folders, and secrets.
+6. Lists every file with its size and SHA-256.
+7. Shows a summary and waits for your approval.
+8. Uploads the release to your releases repo with `gh release create`, either full (installer + source) or update-only.
 
-It never uploads without your go-ahead, never overwrites an existing tag, and never touches signing keys.
+It never uploads without your go-ahead, never overwrites an existing tag, never invents a version number, and never touches signing keys.
 
 ## Install
 
@@ -28,8 +29,8 @@ Or manually: copy `skills/release-packaging/` into your Codex skills folder (for
 
 In your project folder, tell Codex:
 
-- "Prepare a release" (asks for version and mode if it cannot find them)
-- "Prepare release 1.4.0, update-only"
+- "Prepare a release" (finds the latest version and bumps it; asks for the starting number on a first release)
+- "Prepare release 1.4.0, update-only" (your version wins over the automatic bump)
 - "Package the source as rar and publish the full release"
 
 ## Requirements
@@ -39,4 +40,4 @@ In your project folder, tell Codex:
 
 ## Configure
 
-The defaults (zip archives, asking for the releases repo) are written in the Inputs table of `skills/release-packaging/SKILL.md`. Edit them there, and replace the detection step with your exact build commands if you have them.
+The defaults (automatic version bumping, zip archives, asking for the releases repo) are written in the Inputs table of `skills/release-packaging/SKILL.md`. Edit them there, and replace the detection step with your exact build commands if you have them.
