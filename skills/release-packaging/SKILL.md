@@ -1,9 +1,12 @@
 ---
 name: release-packaging
-description: Package and publish a release of the current project. Use when the user asks to prepare a release, build the installer, zip the source, or upload a version or update package to the releases repository.
+description: Package and publish a release of the current project. Use when the user asks to prepare a release, build the installer, zip the source, or upload a version or update package to the releases repository. Also use when the user asks to update this skill, pastes this skill's GitHub link, or asks to add a feature to this skill.
+version: 1.2.0
 ---
 
 # Release packaging
+
+Skill version: 1.2.0. Source: https://github.com/salahadoroobi/shipit-skill (file `skills/release-packaging/SKILL.md`).
 
 Turn the current project into a publishable release in one run: build the installer, archive the source, and upload it to the releases repo.
 
@@ -44,9 +47,38 @@ Ask only for what is missing.
     If the tag already exists, stop and ask. Do not overwrite it.
 11. Report the release URL and the checksums.
 
+## Self-update
+
+Use this when the user pastes the skill's GitHub link or says "update the skill" or "حدث المهارة".
+
+1. Find the installed copy: `~/.codex/skills/release-packaging/SKILL.md` (on Windows `%USERPROFILE%\.codex\skills\release-packaging\SKILL.md`). Read its `version` line.
+2. Download the latest file from `https://raw.githubusercontent.com/salahadoroobi/shipit-skill/main/skills/release-packaging/SKILL.md` (for example `curl -fsSL <url>` or `gh api repos/salahadoroobi/shipit-skill/contents/skills/release-packaging/SKILL.md -H "Accept: application/vnd.github.raw"`). If the user pasted a different link to a fork, use that repo instead and say so.
+3. Check that the download starts with `---` and has `name: release-packaging`. If not, stop and report. Do not replace anything.
+4. Compare versions. If the remote version is the same or older, say the skill is already up to date and stop.
+5. Keep a backup of the old file as `SKILL.md.bak` in the same folder, then replace `SKILL.md` with the new file.
+6. Report the old version, the new version, and a short list of what changed (compare the two files, or read the release notes with `gh release view --repo salahadoroobi/shipit-skill`).
+7. Tell the user to restart Codex so the new version loads.
+
+This step changes only the skill file. It never touches the user's projects or `outputs/`.
+
+## Self-edit
+
+Use this when the user asks to add a feature or change a rule in this skill.
+
+1. Edit the installed `SKILL.md` as asked. Keep it short and in English.
+2. Bump the skill's own `version` (the frontmatter and the "Skill version" line). New feature: bump the middle number. Small fix: bump the last number.
+3. Show the user a summary of the change and the new version, and wait for a go-ahead before publishing.
+4. After approval, publish to the skill repo. Needs the GitHub CLI signed in (`gh auth login` once) or git with push access to `salahadoroobi/shipit-skill`:
+   - Clone or update a local copy of the repo, copy the edited file to `skills/release-packaging/SKILL.md`, commit with a clear message, and push to `main`.
+   - Create the release: `gh release create v<skill version> --repo salahadoroobi/shipit-skill --title "v<skill version>" --notes "<what changed>"`.
+   - If the tag already exists, stop and ask. Do not overwrite it.
+5. If there is no push access, say so, keep the edited local file, and give the user the steps to sign in. Do not try other credentials.
+6. Report the release URL.
+
 ## Rules
 
 - Version tracking: bump only the last number, one step at a time. Never skip a number, reuse one, or overwrite an existing tag. The starting number on a first release always comes from the user.
 - Release notes: use the user's text if given. Otherwise draft them from the commit messages since the last tag and show them in step 9.
 - Never commit `outputs/`. Never upload anything outside `outputs/<version>/`.
+- Skill self-update and self-edit never run during a release, and never publish without the user's go-ahead.
 - If a step fails, stop, report the exact error, and leave `outputs/` as it is.
